@@ -1,0 +1,25 @@
+Configure command
+
+sudo apt-get update -y
+sudo apt-get install python3-distutils
+sudo apt-get install python3-apt
+sudo apt-get install wget
+sudo apt install python3-pip
+sudo apt install python3-venv
+
+# Create virtual environment
+python3 -m venv uber-venv
+source uber-venv/bin/activate
+
+pip install pandas
+pip install google-cloud
+pip install google-cloud-bigquery
+pip install db-dtypes
+							
+# Install mage ai
+pip install mage-ai
+mage start uber-data-engineering
+				
+# list Linux process
+ps aux
+kill <PID>
