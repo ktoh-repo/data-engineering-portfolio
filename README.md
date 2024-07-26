@@ -1,6 +1,8 @@
 # data-engineering-portfolio
 
-# Kafka project
-Brief overview: This project is using Apache Kafka was used to test the functionality of streaming data transmission. <br>
-Technology used: Apache Kafka, Python, SQL, AWS EC2, AWS Anthena, AWS Glue, AWS S3 <br>
-Outcome: Build a real-time stream processing from data ingestion to data transformation(AWS Glue, AWS Anthena). <br>
+# Uber data-pipeline project
+Brief overview: This project is a simulation of the process of data engineering from getting the source file until the data analytic phase. <br>
+Technology used: Google Cloud Platform - Cloud Storage, Compute Engine, Mage AI, Big Query, Looker Studio <br>
+Outcome: Planning stage: plans the technology used and design the data model for analytic usage, \
+  Implementation: carry out a data transformation and build a data pipeline, exporting transformed data into a data platform,  \
+  Data Analytic: Perform data analysis, and present the dashboard. <br>
