@@ -1,6 +1,6 @@
 # data-engineering-portfolio
 
-# Uber data-pipeline project
+# uber data-pipeline project
 - **Brief overview**: This project is a simulation of the process of data engineering from getting the source file until the data analytic stage. <br>
 - **Technology used**: Google Cloud Platform - Cloud Storage, Compute Engine, Mage AI, Big Query, Looker Studio <br>
 - **Outcome**: 
