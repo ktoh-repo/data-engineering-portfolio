@@ -14,3 +14,11 @@
 - **Outcome**:
   - Plan stage: plan for the technology used.
   - Implementation: Extract data from API, write into a file, and uplaod the file in S3, using Apache Airflow Scheduler
+
+# HM kafka project
+- **Brief overview**: This project is simulation of usage of Kafka and utilising set of cloud services tools provided by Google.<br>
+- **Technology used**: Kafka, Google Cloud Platform - Cloud Storage, Compute Engine, Big Query<br>
+- **Outcome**:
+  - Plan stage: Design the data pipeline and data modeling the data.
+  - Implementation stage: Get the datasource from kaggle, study the dataset, perform the data cleansing, create and setup instance on google compute engine, pushing file to s3 and build BigQuery table from Cloud Storage.
+Enhancement still pending to make: Automate the whole flow <br>
