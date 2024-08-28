@@ -22,3 +22,4 @@
   - Plan stage: Design the data pipeline and data modeling the data.
   - Implementation stage: Get the datasource from kaggle, study the dataset, perform the data cleansing, create and setup instance on google compute engine, pushing file to s3 and build BigQuery table from Cloud Storage.
 Enhancement still pending to make: Automate the whole flow <br>
+<span><img src="kafka-project-h&m-product/architecture_h&m_product.png" alt="drawing" width="400"/></span>
