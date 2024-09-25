@@ -25,3 +25,7 @@
     <br><br>
 <span><img src="kafka-project-h&m-product/architecture_h&m_product.png" alt="drawing" width="400"/></span> <br>
 **Enhancement still pending to make: Automate the whole flow <br>
+
+
+# Data Cleaning Project
+- Few Data for data cleaning projects
