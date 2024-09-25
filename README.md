@@ -28,4 +28,4 @@
 
 
 # Data Cleaning Project
-- Few Data for data cleaning projects
+- Few data cleaning mini projects
