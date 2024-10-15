@@ -4,7 +4,7 @@
 - **Brief overview**: In the fast-paced world of e-commerce, having timely and accurate data is critical to driving business decisions. This project focuses on designing, implementing, and optimizing data pipelines to streamline the collection, processing, and analysis of large-scale e-commerce data. The goal is to provide the business with actionable insights on user behavior, market dynamics, and platform engagement across different countries. To aim to enhance user engagement, and seller-buyer relationships. <br>
 - **Technology used**: Azure Data Factory, Azure Data Lake Storage, Azure Databricks, AWS S3
 - **Outcome**:
-  - Implementation: Build data factory pipeline, create a lakehouse by using the idea of the medallion architecture design pattern using Bronze(raw data), Silver(cleanse and normalize the data) and Gold layers (combine all table into one big table) that is enabled via Delta Lake. 
+  - Implementation: Build data factory pipeline, create a lakehouse by using the idea of the medallion architecture design pattern using Bronze(raw data), Silver(cleanse and normalize the data) and Gold layers (combine all table into one big table) that is enabled via Delta Lake. <br>
 <span><img src="Azure_ecommerce_data_project/ecom_fashion_store_architecture.png" alt="drawing" width="400"/></span>
 
 # GCP uber data-pipeline project
