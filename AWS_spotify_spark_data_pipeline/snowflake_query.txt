@@ -1,0 +1,236 @@
+create database spotify_database;
+
+// using secure connection between snowflake and s3
+create or replace storage integration s3_init
+    TYPE = EXTERNAL_STAGE
+    STORAGE_PROVIDER = s3
+    ENABLED = TRUE
+    STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::992382682269:role/spotify_spark_snowflake_role'
+    STORAGE_ALLOWED_LOCATIONS = ('s3://spotify-etl-project-tqx')
+    COMMENT = 'Creating connection to s3';
+
+DESC integration s3_init;
+
+// Create file format object
+CREATE OR REPLACE file format csv_fileformat
+    type = csv
+    field_delimiter = ','
+    skip_header = 1
+    null_if = ('NULL', 'null')
+    empty_field_as_null = TRUE
+    FIELD_OPTIONALLY_ENCLOSED_BY='0x22';
+
+
+// Create stage - able to access s3 (actual connection using storage integration to access s3 data)
+CREATE OR REPLACE stage spotify_stage
+    URL='s3://spotify-etl-project-tqx/transformed_data/'
+    STORAGE_INTEGRATION = s3_init
+    FILE_FORMAT = csv_fileformat;
+
+LIST @spotify_stage;
+LIST @spotify_stage/song;
+
+// create table to upload data
+CREATE OR REPLACE TABLE tbl_album (
+    album_id STRING,
+    name STRING,
+    release_date DATE,
+    total_tracks INT,
+    url STRING
+);
+
+CREATE OR REPLACE TABLE tbl_artist (
+    artist_id STRING,
+    name STRING,
+    url STRING,
+    genres STRING,
+    followers INT,
+    popularity INT
+);
+
+CREATE OR REPLACE TABLE tbl_song (
+    song_id STRING,
+    song_name STRING,
+    duration_ms INT,
+    popularity INT,
+    url STRING,
+    song_added DATE,
+    album_id STRiNG,
+    artist_id STRING
+);
+
+
+// To test single file insertion
+select * from tbl_song;
+
+COPY INTO tbl_song
+FROM @spotify_stage/song_data/song_transformed_20241017/run-1729147346265-part-r-00000 
+
+
+select * from tbl_artist;
+
+COPY INTO tbl_artist
+FROM @spotify_stage/artist_data/artist_transformed_20241017/run-1729147340237-part-r-00001
+
+select * from tbl_album;
+
+COPY INTO tbl_album
+FROM @spotify_stage/album_data/album_transformed_20241017/run-1729147331534-part-r-00002
+
+
+// create snowpipe
+CREATE OR REPLACE SCHEMA pipe;
+
+CREATE OR REPLACE pipe pipe.tbl_song_pipe
+auto_ingest = TRUE
+AS 
+COPY INTO spotify_database.public.tbl_song
+FROM @spotify_database.public.spotify_stage/song_data;
+
+CREATE OR REPLACE pipe pipe.tbl_artist_pipe
+auto_ingest = TRUE
+AS 
+COPY INTO spotify_database.public.tbl_artist
+FROM @spotify_database.public.spotify_stage/artist_data;
+
+CREATE OR REPLACE pipe pipe.tbl_album_pipe
+auto_ingest = TRUE
+AS
+COPY INTO spotify_database.public.tbl_album
+FROM @spotify_database.public.spotify_stage/album_data;
+
+
+DESC pipe pipe.tbl_song_pipe;
+select count(*) from tbl_song;
+select SYSTEM$PIPE_STATUS('pipe.tbl_song_pipe');
+
+
+DESC pipe pipe.tbl_artist_pipe;
+select count(*) from tbl_artist;
+select SYSTEM$PIPE_STATUS('pipe.tbl_artist_pipe');
+
+DESC pipe pipe.tbl_album_pipe;
+select count(*) from tbl_album;
+select SYSTEM$PIPE_STATUS('pipe.tbl_album_pipe');
+
+
+
+--- Query Analytics
+select * from tbl_song;
+select * from tbl_album;
+
+-- 1. Artist-level insights
+-- Popularity > 85
+select name, genres, popularity
+from tbl_artist 
+where popularity > 85
+order by popularity desc;
+
+-- How does an artist's popularity correlate with their number of followers
+select name, followers, popularity
+from tbl_artist  
+order by popularity desc;
+
+-- Which genres are most represented in the top 50 songs?
+WITH WordList AS (
+    SELECT
+        TRIM(value) AS word
+    FROM tbl_artist,
+    TABLE(FLATTEN(input => SPLIT(genres, ','))) -- Correctly using TABLE with FLATTEN
+),
+WordCount AS (
+    SELECT word, COUNT(*) AS word_count
+    FROM WordList
+    WHERE word IS NOT NULL AND word <> ''  -- Filter out NULL or empty words
+    GROUP BY word
+)
+SELECT word, word_count
+FROM WordCount
+ORDER BY word_count DESC
+LIMIT 10;  
+
+-- Are there any emerging genres or trends based on the represented artists?
+WITH WordList AS (
+    SELECT
+        TRIM(value) AS word
+    FROM tbl_artist,
+    TABLE(FLATTEN(input => SPLIT(genres, ','))) -- Correctly using TABLE with FLATTEN
+),
+WordCount AS (
+    SELECT word, COUNT(*) AS word_count
+    FROM WordList
+    WHERE word IS NOT NULL AND word <> ''  -- Filter out NULL or empty words
+    GROUP BY word
+)
+SELECT word, word_count
+FROM WordCount
+where word_count < 2
+ORDER BY word_count;
+
+-- How many unique artists are featured?
+select count(1) from tbl_artist;
+-- There are 52 of artists with top 50 songs,
+
+-- Are there any artists with multiple songs in the top 50?
+WITH ArtistList AS (
+    SELECT
+        TRIM(value) AS artist_id
+    FROM tbl_song,
+    TABLE(FLATTEN(input => SPLIT(artist_id, ','))) -- Split artist_id and unnest the array
+)
+SELECT
+    a.name, count(1) as count_song_in_board
+FROM ArtistList al
+inner join tbl_artist a on a.artist_id = al.artist_id
+WHERE al.artist_id IS NOT NULL AND al.artist_id <> ''
+group by al.artist_id, a.name
+order by count(1) desc; 
+
+-- 2. Album-level insights
+-- What is the distribution of album release dates for the songs in the top 50?
+select a.release_date, count(distinct a.album_id) as unique_album
+from tbl_song s
+inner join tbl_album a on a.album_id = s.album_id
+group by a.release_date
+order by unique_album desc;
+
+-- Which albums contain the most tracks, and are they more likely to include hit songs?
+select al.name as album_name, al.release_date, count(s.song_id) as count_of_song
+from tbl_song s
+inner join tbl_album al on al.album_id = s.album_id 
+group by al.name, al.release_date
+order by count(s.song_id) desc;
+
+-- Are albums with higher total track counts or more recent release dates associated with higher song popularity?
+
+
+--3. Track-Level Insights:
+-- Which songs are the most popular (using song_popularity)?
+select s.song_name, al.name as album_name, s.popularity 
+from tbl_song s
+inner join tbl_album al on al.album_id = s.album_id 
+order by popularity desc
+limit 10;
+
+-- Top Songs by Popularity
+-- Is there a correlation between song popularity and song duration (song_duration)?
+select s.song_name, s.duration_ms, s.popularity 
+from tbl_song s
+inner join tbl_album al on al.album_id = s.album_id 
+order by popularity desc
+limit 10;
+
+-- Is there a correlation between song popularity and song duration (song_duration)?
+select round(duration_ms/60000,2) as duration_in_minutes, popularity 
+from tbl_song 
+order by duration_ms ;
+
+-- 4. Correlation Between Tracks, Artists, and Albums:
+-- Artist-Album Popularity:
+-- Is there a relationship between the popularity of an artist and the popularity of their songs or albums?
+select * from tbl_artist;
+
+
+--Cross-Track Popularity:
+-- Do artists with multiple songs in the top 50 have a consistent popularity score across their tracks?
+
