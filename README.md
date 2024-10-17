@@ -7,6 +7,14 @@
   - Implementation: Build data factory pipeline, create a lakehouse by using the idea of the medallion architecture design pattern using Bronze(raw data), Silver(cleanse and normalize the data) and Gold layers (combine all table into one big table) that is enabled via Delta Lake. <br>
 <span><img src="Azure_ecommerce_data_project/ecom_fashion_store_architecture.png" alt="drawing" width="400"/></span>
 
+# AWS spotify data-pipeline project
+- **Brief overview**: <br>
+- **Technology used**: AWS Lambda, AWS Glue notebook, AWS S3, Snowpipe, Snowflake
+- **Outcome**:
+  - Implementation:  <br>
+<span><img src="AWS_spotify_spark_data_pipeline/spotify_achitecture.png" alt="drawing" width="400"/></span>
+
+
 # GCP uber data-pipeline project
 - **Brief overview**: This project is a simulation of the process of data engineering from getting the source file until the data analytic stage. <br>
 - **Technology used**: Google Cloud Platform - Cloud Storage, Compute Engine, Mage AI, Big Query, Looker Studio <br>
