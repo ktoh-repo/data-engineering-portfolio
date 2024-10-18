@@ -202,7 +202,12 @@ group by al.name, al.release_date
 order by count(s.song_id) desc;
 
 -- Are albums with higher total track counts or more recent release dates associated with higher song popularity?
-
+select a.name, a.release_date, a.total_tracks, avg(s.popularity) as song_avg_popularity
+from tbl_song s 
+inner join tbl_album a on a.album_id = s.album_id
+group by a.name, a.release_date, a.total_tracks
+order by song_avg_popularity desc;
+-- The song popularity doesn't associate with higher total track counts or more recent release dates. 
 
 --3. Track-Level Insights:
 -- Which songs are the most popular (using song_popularity)?
@@ -228,9 +233,41 @@ order by duration_ms ;
 -- 4. Correlation Between Tracks, Artists, and Albums:
 -- Artist-Album Popularity:
 -- Is there a relationship between the popularity of an artist and the popularity of their songs or albums?
-select * from tbl_artist;
+with splitArtistID AS (
+    select 
+        song_id,
+        popularity,
+        song_added,
+        TRIM(value) as split_value
+    from tbl_song s,
+    TABLE(FLATTEN(input => SPLIT(s.artist_id, ',')))
+) -- ,popularityCompare as (
+    select sArt.song_id, Round(avg(ar.popularity)) as avg_artist_popularity, min(sArt.popularity) as song_popularity, song_added,
+        case 
+            when avg_artist_popularity > song_popularity then 'Artist(s)'
+            when avg_artist_popularity < song_popularity then 'Song'
+            ELSE 'Same'
+        end as popularity
+    from tbl_artist ar
+    join splitArtistID sArt on sArt.split_value = ar.artist_id
+    group by song_id, song_added
+) 
+select popularity, count(popularity) as popularity_count
+from popularityCompare
+group by song_added, popularity;
 
 
 --Cross-Track Popularity:
 -- Do artists with multiple songs in the top 50 have a consistent popularity score across their tracks?
+with songsPopularity as (
+    select song_added, artist_id, count(song_id) as no_of_songs, round(avg(popularity)) as avg_song_popularity, round(stddev_pop(popularity),2) as consistency
+    from tbl_song
+    group by song_added, artist_id 
+    having count(song_id) > 1
+)
+select a.name, avg_song_popularity, consistency
+from songspopularity sp
+inner join tbl_artist a on a.artist_id = sp.artist_id;
 
+-- Lower standard deviation in the list is Linkin Park's songs, suggesting that it has consistent popularity across their songs, with very little variation.
+-- Higher standard deviation (like Billie Ellist, 3.5): This indicates more variation in the popularity of Billie Ellist's songs, suggesting that her song popularity is less consistent.
