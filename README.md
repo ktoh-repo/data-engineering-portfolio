@@ -8,10 +8,10 @@
 <span><img src="Azure_ecommerce_data_project/ecom_fashion_store_architecture.png" alt="drawing" width="400"/></span>
 
 # AWS spotify data-pipeline project
-- **Brief overview**: <br>
-- **Technology used**: AWS Lambda, AWS Glue notebook, AWS S3, Snowpipe, Snowflake
+- **Brief overview**: This project focused on developing a scalable data pipeline to ingest, process, and analyze data from Spotify’s API using AWS cloud services. The goal was to gather insights into global music streaming trends, user behavior, and track popularity, enabling data-driven decision-making for music recommendations and playlist curation. <br>
+- **Technology used**: AWS Lambda, AWS EventBridge CloudWatch, AWS Glue notebook, AWS S3, Snowpipe, Snowflake
 - **Outcome**:
-  - Implementation:  <br>
+  - Implementation: Developed a highly scalable and automated data pipeline that processes Spotify's top 50 global music data in near real-time. The system provides valuable insights into global music trends, including track popularity and regional preferences, with weekly updates. This pipeline supported deeper analysis into evolving trends and user preferences, enabling more personalized music recommendations. <br>
 <span><img src="AWS_spotify_spark_data_pipeline/spotify_achitecture.png" alt="drawing" width="400"/></span>
 
 
