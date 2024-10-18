@@ -241,7 +241,7 @@ with splitArtistID AS (
         TRIM(value) as split_value
     from tbl_song s,
     TABLE(FLATTEN(input => SPLIT(s.artist_id, ',')))
-) -- ,popularityCompare as (
+), popularityCompare as (
     select sArt.song_id, Round(avg(ar.popularity)) as avg_artist_popularity, min(sArt.popularity) as song_popularity, song_added,
         case 
             when avg_artist_popularity > song_popularity then 'Artist(s)'
